@@ -38,6 +38,7 @@ function lockRoute(){
   addtoMasterRoutesArray(thisRoute);
   routeControlMasterObject[thisRoute].remove(map);
   createGEOJSON(thisRoute, thisRouteLine);
+  updateShapeText(thisRoute, thisRouteLine);
 }
 /**********************
 Easy Buttons
@@ -59,7 +60,7 @@ stopsMode.addTo(map);
 
 
 
-function newRouteLeaflet(){
+function newRouteLeaflet(defaultName){
   addingRoutes=true;
   var routeControl = addRouteControl();
   var routeArray = new Array();
@@ -68,9 +69,15 @@ function newRouteLeaflet(){
     stopNumber=1;
     if (confirm("Pick the home stop to get started! If you havent defined all the stops in the route, go back to stops mode and mark them first"))
       {// clearRoutes();
+        if(defaultName){
+          routeName = defaultName;
+        }else
+        {
       routeName = prompt("Please enter the new Route Name", "");
       routeName = routeName.replace(/\s+/g, '');
       routeName = routeName.replace(/\//g, '');
+
+        }
       // fakeRouteControlObj[routeName] = (addFakeRouteControl(routeName));
       // fakeRouteControlObj[routeName].addTo(map);
       routeControlMasterObject[routeName] = routeControl;

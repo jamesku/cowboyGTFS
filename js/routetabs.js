@@ -4,7 +4,7 @@ var thisRoute = null;
 $(document).ready(function() {
 $('body').on('click','#create_me',function(){
     //run the map functionality
-    newRouteLeaflet();
+    newRouteLeaflet(null);
     newtab();
 })
 
@@ -17,6 +17,17 @@ $('body').on('click','#delete_entire_route',function(){
     //run the map functionality
     if(confirm("Are you sure you want to delete all route data?")){ deleteThisRoute();
     }
+})
+
+$('body').on('click','#new_route_path',function(){
+    //run the map functionality
+  delete routeLinesObj[thisRoute];
+  var txt = $("#"+thisRoute+"stops");
+  txt.val("stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,stop_url,location_type,parent_station\n");
+var txt = $("#"+thisRoute+"shape");
+txt.val("shape_id,shape_pt_lat,shape_pt_lon,shape_pt_sequence,shape_dist_traveled\n");
+  routeLines.clearLayers();
+  newRouteLeaflet(thisRoute)
 })
 
 $('.nav-tabs').on('click','li > a',function(event){

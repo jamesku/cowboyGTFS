@@ -428,3 +428,11 @@ function createGEOJSON(shapetxt, latlngs){
     paintLinesOnMap(geojsonFeature, shapetxt);
 
   };
+function updateShapeText(thisRoute, thisRouteLine){
+  var txt = $("#"+thisRoute+"shape");
+  txt.val("shape_id,shape_pt_lat,shape_pt_lon,shape_pt_sequence,shape_dist_traveled\n");
+  var shape_id = prompt("please enter a shape id")
+  for (i=0; i<thisRouteLine.length; i++){
+    txt.val(txt.val()+shape_id+','+thisRouteLine[i][1]+','+thisRouteLine[i][0]+','+(i+1)+',\n');
+  }
+}
