@@ -1,4 +1,7 @@
+// Toggle for adding stops or adding Routes
 var addingRoutes = false;
+
+// create map
 var map = L.map('mapid', {
     layers: [],
     center: [30.291807, -97.677080],
@@ -45,7 +48,6 @@ function lockRoute() {
 /**********************
 Easy Buttons
 */
-
 var stopsMode = L.easyButton({
     states: [{
         icon: '<span class="star">&starf;</span>',
@@ -58,13 +60,10 @@ var stopsMode = L.easyButton({
 
 stopsMode.addTo(map);
 
-
-
 function newRouteLeaflet(defaultName) {
     addingRoutes = true;
     var routeControl = addRouteControl();
-    var routeArray = [];
-    routeArray = routeControl.getWaypoints();
+    var routeArray = routeControl.getWaypoints();
     if (routeArray[0].latLng === null) {
         stopNumber = 1;
         if (confirm("Pick the home stop to get started! If you havent defined all the stops in the route, go back to stops mode and mark them first")) { // clearRoutes();
@@ -74,12 +73,10 @@ function newRouteLeaflet(defaultName) {
                 routeName = prompt("Please enter the new Route Name", "");
                 routeName = routeName.replace(/\s+/g, '');
                 routeName = routeName.replace(/\//g, '');
-
             }
-            // fakeRouteControlObj[routeName] = (addFakeRouteControl(routeName));
-            // fakeRouteControlObj[routeName].addTo(map);
             routeControlMasterObject[routeName] = routeControl;
             thisRoute = routeName;
+            //important for leaflet routing machine
             routeControlMasterObject[routeName].addTo(map).on('routeselected', function(e) {
                 var route = e.route;
                 thisRouteLine = [];
@@ -91,6 +88,7 @@ function newRouteLeaflet(defaultName) {
     }
 }
 
+//style icon to be used for non stop route points
 var greyIcon = new L.Icon({
     iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -100,14 +98,12 @@ var greyIcon = new L.Icon({
     shadowSize: [20, 20]
 });
 
-
 /**************************
 handling routes
 */
 
 function addRouteControl() {
-
-    var routeControl = L.Routing.control({
+  var routeControl = L.Routing.control({
         waypoints: [],
         show: false,
         createMarker: function(i, wp) {
@@ -126,24 +122,13 @@ function addRouteControl() {
             });
             return line;
         },
-    });
-
+      });
     return routeControl;
-
 }
-
-function removeRouteControl() {
-    routeControl.remove(map);
-}
-
 
 /*******************************
 handling stops that exist (delete them or add them to a route)
 */
-
-var layerobj = {};
-//controller = L.control.layers(null, layerobj, {position: 'topleft'}).addTo(map);
-
 function createButton(label, container) {
     var btn = L.DomUtil.create('button', '', container);
     btn.setAttribute('type', 'button');
@@ -156,18 +141,13 @@ stopLayer.on('click', function(event) {
     var clickedMarker = event.layer;
     var stopName = clickedMarker.options.title;
     var container = L.DomUtil.create('div');
-
     if (!addingRoutes){
-
-            deleteBtn = createButton('delete', container);
-
+        deleteBtn = createButton('delete', container);
         L.popup()
             .setContent(container)
             .setLatLng(event.latlng)
             .openOn(map);
-
         L.DomEvent.on(deleteBtn, 'click', function(e) {
-            console.log(stopsArray);
             var stopNameIndex;
             for (var i = 0; i < stopsArray.length; i++) {
                 if (i === 0) {
@@ -177,46 +157,33 @@ stopLayer.on('click', function(event) {
                     stopsArray.splice(i, 1);
                 }
             }
-            console.log(stopsArray);
-            setStopsTextArea();
             map.closePopup();
         });
     } else {
-            addStopBtn = createButton('Add Stop to Route', container);
-
+        addStopBtn = createButton('Add Stop to Route', container);
         L.popup()
             .setContent(container)
             .setLatLng(event.latlng)
             .openOn(map);
-
         L.DomEvent.on(addStopBtn, 'click', function(event) {
+            //stopNumber is set to 1 when someone clicks new route
             if (stopNumber === 1) {
                 routeControlMasterObject[thisRoute].spliceWaypoints(0, 1, latlng);
                 alert("Great! now select the second stop!");
             }
-
             if (stopNumber === 2) {
                 routeControlMasterObject[thisRoute].spliceWaypoints(routeControlMasterObject[thisRoute].getWaypoints().length - 1, 1, latlng);
                 alert("Great! second stop established, now select the thrid stop and the fourth and so on, until you click back on the original stop to close the circuit - if the line goes off of the route, drag the line to correct it!");
             }
-
             if (stopNumber > 2) {
                 routeControlMasterObject[thisRoute].spliceWaypoints(routeControlMasterObject[thisRoute].getWaypoints().length, 0, latlng);
             }
             addStopToRoute(stopName);
             stopNumber++;
-
-            // routeControlMasterObject[thisRoute].spliceWaypoints(routeControlMasterObject[thisRoute].getWaypoints().length-1, 1, L.latLng(51.705, -0.19));
-
             var routeArray = [];
             routeArray = routeControlMasterObject[thisRoute].getWaypoints();
-            //alert (JSON.stringify(routeArray));
-
-
             map.closePopup();
         });
-
-
     }
 });
 
@@ -238,7 +205,6 @@ map.on('click', function(e) {
                 zIndexOffset: 1000
             });
             stopLayer.addLayer(marker);
-            layerobj[stopname] = stopLayer;
             if (!stopsArray[0]) {
                 stopsArray.push(['stop_id', 'stop_code', 'stop_name', 'stop_desc', 'stop_lat', 'stop_lon', 'stop_url', 'location_type', 'parent_station']);
             }
@@ -254,7 +220,6 @@ map.on('click', function(e) {
             thisStop[stopNameIndex] = stopname;
             stopsArray.push(thisStop);
             map.closePopup();
-            setStopsTextArea();
         });
     } else {
         L.popup()
@@ -271,7 +236,6 @@ function loadStopFunction(stopname, e) {
         zIndexOffset: 1000
     });
     stopLayer.addLayer(marker);
-    layerobj[stopname] = stopLayer;
     map.closePopup();
 }
 

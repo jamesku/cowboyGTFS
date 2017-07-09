@@ -81,14 +81,6 @@ makeTextFile = function(text) {
     return textFile;
 };
 
-
-
-
-
-// var checkarray = [];
-
-
-
 //function to load GTFS files
 function loadZipFile(file) {
     var latlng = {};
@@ -128,8 +120,6 @@ function loadZipFile(file) {
                 }
             }
         });
-
-
         //load Trips next
         zip.files["trips.txt"].async('string').then(function(fileData) {
             var lines = fileData.split('\n');
@@ -159,18 +149,15 @@ function loadZipFile(file) {
                         tripRouteId = jQuery.inArray("route_id", array);
                         tripTripId = jQuery.inArray("trip_id", array);
                         shapeId = jQuery.inArray("shape_id", array);
-
                     } else {
                         if (thisRouteID === array[tripRouteId]) {
                             routeShortName = routeShortName.replace(/\s+/g, '');
                             routeShortName = routeShortName.replace(/\//g, '');
                             var txt = $("#" + routeShortName + "trips");
                             txt.val(txt.val() + array.join(','));
-                            // console.log(array[tripTripId]);
+                            //these miniCheaters are useful to create arrays to push into the bigger cheaters
                             var miniCheater = [routeShortName, array[tripTripId]];
-
                             namesTripIdCheater.push(miniCheater);
-
                             var miniCheater2 = ([routeShortName, array[shapeId]]).join();
                             if (!namesShapeIdCheater.includes(miniCheater2)) {
                                 namesShapeIdCheater.push(miniCheater2);
@@ -181,7 +168,7 @@ function loadZipFile(file) {
                 }
             });
         });
-
+        //Stop Times
         zip.files["stop_times.txt"].async('string').then(function(fileData) {
             var lines = fileData.split('\n');
             var stopTimesTripId;
@@ -210,7 +197,7 @@ function loadZipFile(file) {
                 }
             });
         });
-
+        //Stops themselves
         zip.files["stops.txt"].async('string').then(function(fileData) {
             var lines = fileData.split('\n');
             var duplicateFilter = [];
@@ -245,12 +232,10 @@ function loadZipFile(file) {
                             }
                         }
                     });
-                    //need to add a safety here where mixed up arrays are handled.
                 }
             }
-            setStopsTextArea();
         });
-
+        //frequencies.txt
         zip.files["frequencies.txt"].async('string').then(function(fileData) {
             var lines = fileData.split('\n');
             var frequenciesTripId;
@@ -272,31 +257,27 @@ function loadZipFile(file) {
                 }
             });
         });
-
+        //shapes.txt
         zip.files["shapes.txt"].async('string').then(function(fileData) {
             var sortShapesArray = [];
             var routeName;
             var lines = fileData.split('\n');
-
             var tempstring = lines[0];
+            //these replacements are to clean strings from weird white spaces
             tempstring = tempstring.replace(/[\n\r]/g, '');
             var headerArray = tempstring.split(',');
-
             if (!shapesArray[0]) {
                 shapesArray.push(headerArray);
             }
-
             var shapesId = jQuery.inArray("shape_id", headerArray);
 
             for (var i = 1; i < lines.length; i++) {
                 var array = lines[i].split(',');
                 sortShapesArray.push(array);
             }
-
             var shapePS = jQuery.inArray("shape_pt_sequence", headerArray);
-
+            //we want to sort the shapes based on pt_sequence just to help the user
             sortShapesArray = sortShapesArray.sort(sortFunction);
-
             function sortFunction(a, b) {
                 if (parseInt(a[shapePS]) === parseInt(b[shapePS])) {
                     return 0;
@@ -304,16 +285,15 @@ function loadZipFile(file) {
                     return (parseInt(a[shapePS]) < parseInt(b[shapePS])) ? -1 : 1;
                 }
             }
-
             for (i = 0; i < sortShapesArray.length; i++) {
                 var array2 = sortShapesArray[i];
+                //here we use the cheater array to help
                 namesShapeIdCheater.forEach(function(string) {
                     var element = string.split(',');
                     var cheaterRouteId = element[1].toString();
                     cheaterRouteId = cheaterRouteId.replace(/[\n\r]/g, '').trim();
                     var thisRouteId = array2[shapesId].toString();
                     thisRouteId = thisRouteId.replace(/[\n\r]/g, '').trim();
-
                     if (cheaterRouteId === thisRouteId) {
                         var txt = $("#" + element[0] + "shape");
                         txt.val(txt.val() + array2.join());
@@ -321,17 +301,15 @@ function loadZipFile(file) {
                 });
                 shapesArray.push(array2);
             }
-
+            // use the same points we just put in to make the leaflet geoJson feature
             namesShapeIdCheater.forEach(function(string) {
                 var element = string.split(',');
                 var txt = $('#' + element[0] + 'shape').val().split("\n");
                 txt = txt.filter(function(entry) {
                     return entry.trim() != '';
                 });
-
                 var shape_pt_lon = jQuery.inArray("shape_pt_lon", headerArray);
                 var shape_pt_lat = jQuery.inArray("shape_pt_lat", headerArray);
-
                 var thesePoints = [];
 
                 for (i = 1; i < txt.length; i++) {
@@ -343,7 +321,7 @@ function loadZipFile(file) {
             });
         });
 
-
+// Deal with the other text files
         Object.keys(zip.files).forEach(function(filename) {
             zip.files[filename].async('string').then(function(fileData) {
                 switch (filename) {
@@ -363,14 +341,7 @@ function loadZipFile(file) {
     });
 }
 
-function setStopsTextArea() {
-    var txt = $("#stopsdata");
-    txt.val('');
-    for (i = 0; i < stopsArray.length; i++) {
-        txt.val(txt.val() + stopsArray[i].join(','));
-    }
-}
-
+// Various functions
 function addStopToRoute(stopName) {
     var txt = $('#' + thisRoute + 'stops');
     var stopNameIndex = jQuery.inArray("stop_name", stopsArray[0]);
@@ -380,7 +351,7 @@ function addStopToRoute(stopName) {
         }
     }
 }
-
+// The front page is compiled from all the text in all the tabs
 function refreshAll() {
     var allstoptxt = $('#stopsdata').val('');
     var allroutetxt = $('#routesdata').val('');
@@ -391,7 +362,6 @@ function refreshAll() {
     var duplicateFilter = [];
 
     masterRoutesArray.forEach(function(element) {
-
         var stoptxt = $('#' + element + 'stops').val().split("\n");
         stoptxt = stoptxt.filter(function(entry) {
             return entry.trim() != '';
@@ -417,7 +387,6 @@ function refreshAll() {
             return entry.trim() != '';
         });
 
-
         refreshLoop(stoptxt, allstoptxt);
         refreshLoop(routetxt, allroutetxt);
         refreshLoop(frequencytxt, allfrequencytxt);
@@ -438,11 +407,10 @@ function refreshAll() {
                 }
             }
         }
-
     });
 }
 
-
+// Create Geojson and then add it to the leaflet map
 function createGEOJSON(shapetxt, latlngs) {
     var geojsonFeature = {
         "type": "Feature",
@@ -455,9 +423,7 @@ function createGEOJSON(shapetxt, latlngs) {
             "coordinates": latlngs
         }
     };
-
     paintLinesOnMap(geojsonFeature, shapetxt);
-
 }
 
 function updateShapeText(thisRoute, thisRouteLine) {
