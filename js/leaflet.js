@@ -8,7 +8,7 @@ var map = L.map('mapid', {
     zoom: 13
 });
 
-var routeControlMasterObject = {};
+var globalRouteControl;
 var thisRoute = "";
 var stopNumber = 0;
 var fakeRouteControlObj = {};
@@ -41,7 +41,7 @@ L.Control.geocoder().addTo(map);
 
 function lockRoute() {
     addtoMasterRoutesArray(thisRoute);
-    routeControlMasterObject[thisRoute].remove(map);
+    globalRouteControl.remove(map);
     createGEOJSON(thisRoute, thisRouteLine);
     updateShapeText(thisRoute, thisRouteLine);
 }
@@ -62,29 +62,25 @@ stopsMode.addTo(map);
 
 function newRouteLeaflet(defaultName) {
     addingRoutes = true;
-    var routeControl = addRouteControl();
-    var routeArray = routeControl.getWaypoints();
-    if (routeArray[0].latLng === null) {
-        stopNumber = 1;
-        if (confirm("Pick the home stop to get started! If you havent defined all the stops in the route, go back to stops mode and mark them first")) { // clearRoutes();
-            if (defaultName) {
-                routeName = defaultName;
-            } else {
-                routeName = prompt("Please enter the new Route Name", "");
-                routeName = routeName.replace(/\s+/g, '');
-                routeName = routeName.replace(/\//g, '');
-            }
-            routeControlMasterObject[routeName] = routeControl;
-            thisRoute = routeName;
-            //important for leaflet routing machine
-            routeControlMasterObject[routeName].addTo(map).on('routeselected', function(e) {
-                var route = e.route;
-                thisRouteLine = [];
-                for (var i = 0; i < route.coordinates.length; i++) {
-                    thisRouteLine.push([route.coordinates[i].lng, route.coordinates[i].lat]);
-                }
-            });
+    stopNumber = 1;
+    if (confirm("Pick the home stop to get started! If you havent defined all the stops in the route, go back to stops mode and mark them first")) { // clearRoutes();
+        if (defaultName) {
+            routeName = defaultName;
+        } else {
+            routeName = prompt("Please enter the new Route Name", "");
+            routeName = routeName.replace(/\s+/g, '');
+            routeName = routeName.replace(/\//g, '');
         }
+        //important for leaflet routing machine
+        globalRouteControl = addRouteControl(routeName);
+        thisRoute = routeName;
+        globalRouteControl.addTo(map).on('routeselected', function(e) {
+            var route = e.route;
+            thisRouteLine = [];
+            for (var i = 0; i < route.coordinates.length; i++) {
+                thisRouteLine.push([route.coordinates[i].lng, route.coordinates[i].lat]);
+            }
+        });
     }
 }
 
@@ -102,8 +98,8 @@ var greyIcon = new L.Icon({
 handling routes
 */
 
-function addRouteControl() {
-  var routeControl = L.Routing.control({
+function addRouteControl(routeName) {
+    var routeControl = L.Routing.control({
         waypoints: [],
         show: false,
         createMarker: function(i, wp) {
@@ -116,13 +112,12 @@ function addRouteControl() {
             var line = L.Routing.line(route);
             line.eachLayer(function(l) {
                 l.on('click', function(e) {
-                    thisRoute = this.routeName;
-                    alert(thisRoute);
+                    alert(routeName);
                 });
             });
             return line;
         },
-      });
+    });
     return routeControl;
 }
 
@@ -141,7 +136,7 @@ stopLayer.on('click', function(event) {
     var clickedMarker = event.layer;
     var stopName = clickedMarker.options.title;
     var container = L.DomUtil.create('div');
-    if (!addingRoutes){
+    if (!addingRoutes) {
         deleteBtn = createButton('delete', container);
         L.popup()
             .setContent(container)
@@ -168,20 +163,18 @@ stopLayer.on('click', function(event) {
         L.DomEvent.on(addStopBtn, 'click', function(event) {
             //stopNumber is set to 1 when someone clicks new route
             if (stopNumber === 1) {
-                routeControlMasterObject[thisRoute].spliceWaypoints(0, 1, latlng);
+                globalRouteControl.spliceWaypoints(0, 1, latlng);
                 alert("Great! now select the second stop!");
             }
             if (stopNumber === 2) {
-                routeControlMasterObject[thisRoute].spliceWaypoints(routeControlMasterObject[thisRoute].getWaypoints().length - 1, 1, latlng);
+                globalRouteControl.spliceWaypoints(globalRouteControl.getWaypoints().length - 1, 1, latlng);
                 alert("Great! second stop established, now select the thrid stop and the fourth and so on, until you click back on the original stop to close the circuit - if the line goes off of the route, drag the line to correct it!");
             }
             if (stopNumber > 2) {
-                routeControlMasterObject[thisRoute].spliceWaypoints(routeControlMasterObject[thisRoute].getWaypoints().length, 0, latlng);
+                globalRouteControl.spliceWaypoints(globalRouteControl.getWaypoints().length, 0, latlng);
             }
             addStopToRoute(stopName);
             stopNumber++;
-            var routeArray = [];
-            routeArray = routeControlMasterObject[thisRoute].getWaypoints();
             map.closePopup();
         });
     }
@@ -196,7 +189,6 @@ map.on('click', function(e) {
             .setContent(container)
             .setLatLng(e.latlng)
             .openOn(map);
-
         L.DomEvent.on(addStopBtn, 'click', function() {
             console.log(stopsArray);
             stopname = prompt("Please enter the stop name", "");
@@ -230,6 +222,7 @@ map.on('click', function(e) {
 });
 
 
+// These functions deal with putting markers and lines on the leaflet map
 function loadStopFunction(stopname, e) {
     var marker = L.marker([e.latlng.lat, e.latlng.lng], {
         title: stopname,
@@ -243,8 +236,6 @@ var routeLines = L.featureGroup().addTo(map);
 var routeLinesObj = {};
 
 function paintLinesOnMap(geojsonFeature, shapetxt) {
-    console.log(geojsonFeature);
-    console.log(shapetxt);
     routeLinesObj[shapetxt] = L.geoJSON(geojsonFeature, {
         style: function(feature) {
             return {
@@ -255,8 +246,6 @@ function paintLinesOnMap(geojsonFeature, shapetxt) {
     }).bindPopup(function(layer) {
         return layer.feature.properties.description;
     });
-    console.log(routeLinesObj[shapetxt]);
-    // routeLines.addData(routeLinesObj[shapetxt]);
     routeLinesObj[shapetxt].addTo(routeLines);
 }
 
@@ -274,5 +263,3 @@ function addAllRoutesToMap() {
         }
     });
 }
-
-//Load stops from GTFS files

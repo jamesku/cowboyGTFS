@@ -1,25 +1,28 @@
+// thisRoute variable is SUPER important, its the index throughout the code
+// that lets the program know what route its working on, and things like div
+// names are tied to it
 var thisRoute = null;
-//add a tab when the new route button is clicked
+//add a bunch of listeners for the buttons
 $(document).ready(function() {
     $('body').on('click', '#create_me', function() {
-        //run the map functionality
+        //create new tab
         newRouteLeaflet(null);
         newtab();
     });
     $('body').on('click', '#lock_route_path', function() {
-        //run the map functionality
+        //convert the routing to a geojson
         lockRoute();
     });
 
     $('body').on('click', '#delete_entire_route', function() {
-        //run the map functionality
+        //delete the tab
         if (confirm("Are you sure you want to delete all route data?")) {
             deleteThisRoute();
         }
     });
 
     $('body').on('click', '#new_route_path', function() {
-        //run the map functionality
+        //reset the leaflet geojson for the specific route
         delete routeLinesObj[thisRoute];
         var txt = $("#" + thisRoute + "stops");
         txt.val("stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,stop_url,location_type,parent_station\n");
@@ -92,7 +95,6 @@ function deleteThisRoute() {
     var list_tab_selector = $('#tabId' + thisRoute);
     $(active_tab_selector).remove();
     $(list_tab_selector).remove();
-
     delete routeLinesObj[thisRoute];
     var index = masterRoutesArray.indexOf(thisRoute);
     if (index > -1) {

@@ -286,20 +286,20 @@ function loadZipFile(file) {
                 }
             }
             for (i = 0; i < sortShapesArray.length; i++) {
-                var array2 = sortShapesArray[i];
+                var array = sortShapesArray[i];
                 //here we use the cheater array to help
                 namesShapeIdCheater.forEach(function(string) {
                     var element = string.split(',');
                     var cheaterRouteId = element[1].toString();
                     cheaterRouteId = cheaterRouteId.replace(/[\n\r]/g, '').trim();
-                    var thisRouteId = array2[shapesId].toString();
+                    var thisRouteId = array[shapesId].toString();
                     thisRouteId = thisRouteId.replace(/[\n\r]/g, '').trim();
                     if (cheaterRouteId === thisRouteId) {
                         var txt = $("#" + element[0] + "shape");
-                        txt.val(txt.val() + array2.join());
+                        txt.val(txt.val() + array.join());
                     }
                 });
-                shapesArray.push(array2);
+                shapesArray.push(array);
             }
             // use the same points we just put in to make the leaflet geoJson feature
             namesShapeIdCheater.forEach(function(string) {
