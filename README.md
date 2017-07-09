@@ -1,6 +1,8 @@
 # cowboyGTFS
 A GUI/text interface to create and modify GTFS files for small Transit Route Systems
 
+Check out the screenshot for what it looks like: (https://github.com/jamesku/cowboyGTFS/blob/master/screenshot.png)
+
 A javascript/jquery/html solution, this web application utilizes the mapping of Leaflet and Leaflet Routing Machine with support from JSzip, Leaflet Control Geocode, Leaflet Easybuttons and RandomColor.js
 
 Usage is pretty simple! Download the whole thing and open index.html - weblinks to jquery and leaflet go through a cdn and some of the other libraries that might not be reliably hosted are included in the repository.
