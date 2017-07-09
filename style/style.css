@@ -1,5 +1,9 @@
 #mapid { height:500px; }
 
+body {
+  height: 100%;
+}
+
 textarea {
   width: 100%;
 }
