@@ -117,7 +117,7 @@ function loadZipFile(file) {
                     }
                     var thisRouteId = array[routeId];
                     if (routeShortName) {
-                        namesRouteIdCheater[routeShortName.replace(/\s+/g, '').replace(/\//g, '')] = thisRouteId;
+                        namesRouteIdCheater[routeShortName.replace(/\s+/g, '').replace(/\//g, '')] = array;
                         masterRoutesArray.push(routeShortName.replace(/\s+/g, '').replace(/\//g, ''));
                         //add all the routes to the routesArray and load the necessary tabs
                         routesArray.push(array);

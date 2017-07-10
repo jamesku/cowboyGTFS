@@ -66,14 +66,15 @@ $(document).ready(function() {
 function loadRoutesFunction(routeShortName) {
     thisRoute = routeShortName;
     newtab(namesRouteIdCheater[routeShortName]);
+    updateRouteIds();
 }
 
-function newtab(name) {
+function newtab(routeId) {
     var index = $('.nav-tabs li').length + 1;
     $('.nav-tabs').append('<li id="tabId' + thisRoute + '"><a href="#tab' + index + '">' + thisRoute + '</a></li>');
     $('.ui-page').append('<section id="tab' + index +
         '" class="tab-content hide">Route<br>route_id,route_short_name,route_long_name,route_desc,route_type,route_color<br><textarea id="' + thisRoute +
-        'route" name="' + thisRoute + 'route">route_id,route_short_name,route_long_name,route_desc,route_type,route_color\n'+name+',' + thisRoute +
+        'route" name="' + thisRoute + 'route">route_id,route_short_name,route_long_name,route_desc,route_type,route_color\n'+routeId+',' + thisRoute +
         ',XX,,,</textarea>Stops<br>stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,stop_url,location_type,parent_station<br><textarea id="' + thisRoute +
         'stops" name="' + thisRoute + 'stops">stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,stop_url,location_type,parent_station\n</textarea>Frequency<br>trip_id,start_time,end_time,headway_secs<br><textarea id="' + thisRoute +
         'frequency" name="' + thisRoute + 'frequency">trip_id,start_time,end_time,headway_secs\n</textarea>Trips<br>route_id,service_id,trip_id,trip_headsign,trip_short_name,direction_id,block_id,shape_id<br><textarea id="' + thisRoute +
@@ -100,4 +101,12 @@ function deleteThisRoute() {
     if (index > -1) {
         masterRoutesArray.splice(index, 1);
     }
+}
+
+function updateRouteIds(){
+  Object.keys(namesRouteIdCheater).forEach( function(key){
+    var txt = $("#" + key + "route");
+    txt.val();
+    txt.val(txt.val() +'route_id,route_short_name,route_long_name,route_desc,route_type,route_color\n'+ namesRouteIdCheater[key]);
+  });
 }
