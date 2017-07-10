@@ -10,6 +10,7 @@ var shapesArray = [];
 var namesTripIdCheater = [];
 var namesStopIdCheater = [];
 var namesShapeIdCheater = [];
+var namesRouteIdCheater = {};
 //this is one master array to keep a list of the routes, helpful for looping through
 //when compiling the front page
 var masterRoutesArray = [];
@@ -95,6 +96,7 @@ function loadZipFile(file) {
             //inform us about the rest of the file - not all GTFS headers are created equal! some values are optional
             var routeShortNameIndex;
             var routeLongNameIndex;
+            var routeId;
             for (var i = 0; i < lines.length; i++) {
                 var array = lines[i].split(',');
                 if (i === 0) {
@@ -105,13 +107,17 @@ function loadZipFile(file) {
                     // find some index values
                     routeShortNameIndex = jQuery.inArray("route_short_name", array);
                     routeLongNameIndex = jQuery.inArray("route_long_name", array);
+                    routeId = jQuery.inArray("route_id", array);
+
                 } else {
                     //make sure the values actually have a value (if short name doesnt work, use the long one)
                     var routeShortName = array[routeShortNameIndex];
                     if (!routeShortName) {
                         routeShortName = array[routeLongNameIndex];
                     }
+                    var thisRouteId = array[routeId];
                     if (routeShortName) {
+                        namesRouteIdCheater[routeShortName.replace(/\s+/g, '').replace(/\//g, '')] = thisRouteId;
                         masterRoutesArray.push(routeShortName.replace(/\s+/g, '').replace(/\//g, ''));
                         //add all the routes to the routesArray and load the necessary tabs
                         routesArray.push(array);
