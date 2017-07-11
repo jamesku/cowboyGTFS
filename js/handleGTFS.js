@@ -212,6 +212,7 @@ function loadZipFile(file) {
             var stopNameIndex;
             var stopIdIndex;
             for (var i = 0; i < lines.length; i++) {
+                lines[i]=lines[i].replace(/[\n\r]/g, '').trim();
                 var array = lines[i].split(',');
                 if (i === 0) {
                     if (!stopsArray[0]) {
@@ -225,6 +226,7 @@ function loadZipFile(file) {
                     var stopName = array[stopNameIndex];
                     e.latlng.lat = array[stopLatIndex];
                     e.latlng.lng = array[stopLngIndex];
+                    if(!array[8]){array[8]='';}
                     stopsArray.push(array);
                     loadStopFunction(stopName, e);
                     map.setView(new L.LatLng(e.latlng.lat, e.latlng.lng), 13);
@@ -234,7 +236,7 @@ function loadZipFile(file) {
                             if (!duplicateFilter.includes(element)) {
                                 duplicateFilter.push(element);
                                 var txt = $("#" + tempArray[0] + "stops");
-                                txt.val(txt.val() + array.join(','));
+                                txt.val(txt.val() + array.join(',') + '\n');
                             }
                         }
                     });
