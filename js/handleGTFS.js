@@ -160,7 +160,7 @@ function loadZipFile(file) {
                             routeShortName = routeShortName.replace(/\s+/g, '');
                             routeShortName = routeShortName.replace(/\//g, '');
                             var txt = $("#" + routeShortName + "trips");
-                            txt.val(txt.val() + array.join(','));
+                            txt.val(txt.val() + array.join(',') + '\n');
                             //these miniCheaters are useful to create arrays to push into the bigger cheaters
                             var miniCheater = [routeShortName, array[tripTripId]];
                             namesTripIdCheater.push(miniCheater);
@@ -191,18 +191,24 @@ function loadZipFile(file) {
                     } else {
                         if (element[1] === array[stopTimesTripId]) {
                             var txt = $("#" + element[0] + "stoptimes");
-                            txt.val(txt.val() + array.join(','));
-                            var cheater = element[0] + ',' + array[stopTimesStopId];
-                            //remove duplicates
+                            txt.val(txt.val() + array.join(',') + '\n');
+                            var cheater = (element[0]+','+array[stopTimesStopId]);
+                            // console.log(cheater);
+                            // //remove duplicates
                             if (!namesStopIdCheater.includes(cheater)) {
                                 namesStopIdCheater.push(cheater);
+                                console.log(namesStopIdCheater);
                             }
                         }
                         stopTimesArray.push(array);
                     }
                 }
             });
+            //we need to process stops.txt after stop_times.txt
+            goToStops();
         });
+
+        function goToStops(){
         //Stops themselves
         zip.files["stops.txt"].async('string').then(function(fileData) {
             var lines = fileData.split('\n');
@@ -211,7 +217,9 @@ function loadZipFile(file) {
             var stopLngIndex;
             var stopNameIndex;
             var stopIdIndex;
+              console.log("got here1");
             for (var i = 0; i < lines.length; i++) {
+                console.log("got here2");
                 lines[i]=lines[i].replace(/[\n\r]/g, '').trim();
                 var array = lines[i].split(',');
                 if (i === 0) {
@@ -230,9 +238,20 @@ function loadZipFile(file) {
                     stopsArray.push(array);
                     loadStopFunction(stopName, e);
                     map.setView(new L.LatLng(e.latlng.lat, e.latlng.lng), 13);
+                    console.log("got here3");
+                    // console.log(namesStopIdCheater);
+                    console.log(namesStopIdCheater);
                     namesStopIdCheater.forEach(function(element) {
+                      // console.log("got here");
                         tempArray = element.split(',');
+
+                        // console.log(tempArray);
+                        // console.log(array);
+
                         if (tempArray[1] === array[stopIdIndex]) {
+                            // console.log("got here");
+                            // console.log(tempArray);
+                            // console.log(array);
                             if (!duplicateFilter.includes(element)) {
                                 duplicateFilter.push(element);
                                 var txt = $("#" + tempArray[0] + "stops");
@@ -243,6 +262,7 @@ function loadZipFile(file) {
                 }
             }
         });
+      }
         //frequencies.txt
         zip.files["frequencies.txt"].async('string').then(function(fileData) {
             var lines = fileData.split('\n');
@@ -304,7 +324,7 @@ function loadZipFile(file) {
                     thisRouteId = thisRouteId.replace(/[\n\r]/g, '').trim();
                     if (cheaterRouteId === thisRouteId) {
                         var txt = $("#" + element[0] + "shape");
-                        txt.val(txt.val() + array.join());
+                        txt.val(txt.val() + array.join() +'\n');
                     }
                 });
                 shapesArray.push(array);
@@ -355,7 +375,7 @@ function addStopToRoute(stopName) {
     var stopNameIndex = jQuery.inArray("stop_name", stopsArray[0]);
     for (i = 0; i < stopsArray.length; i++) {
         if (stopsArray[i][stopNameIndex] === stopName) {
-            txt.val(txt.val() + stopsArray[i].join(',') + "\n");
+            txt.val(txt.val() + stopsArray[i].join(',') +"\n");
         }
     }
 }
@@ -439,6 +459,6 @@ function updateShapeText(thisRoute, thisRouteLine) {
     txt.val("shape_id,shape_pt_lat,shape_pt_lon,shape_pt_sequence,shape_dist_traveled\n");
     var shape_id = prompt("please enter a shape id");
     for (i = 0; i < thisRouteLine.length; i++) {
-        txt.val(txt.val() + shape_id + ',' + thisRouteLine[i][1] + ',' + thisRouteLine[i][0] + ',' + (i + 1) + ',\n');
+        txt.val(txt.val() + shape_id + ',' + thisRouteLine[i][1] + ',' + thisRouteLine[i][0] + ',' + (i + 1) + ","+'\n');
     }
 }

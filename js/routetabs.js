@@ -106,7 +106,7 @@ function deleteThisRoute() {
 function updateRouteIds(){
   Object.keys(namesRouteIdCheater).forEach( function(key){
     var txt = $("#" + key + "route");
-    txt.val();
+    txt.val("");
     txt.val(txt.val() +'route_id,route_short_name,route_long_name,route_desc,route_type,route_color\n'+ namesRouteIdCheater[key]);
   });
 }
